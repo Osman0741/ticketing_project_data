@@ -17,4 +17,6 @@ public interface ProjectService {
     void complete(ProjectDTO project);
 
     void update(ProjectDTO project);
+
+    List<ProjectDTO> listAllProjectDetails();
 }
