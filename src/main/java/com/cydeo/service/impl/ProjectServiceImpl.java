@@ -61,7 +61,10 @@ public class ProjectServiceImpl implements ProjectService {
     public void delete(String projectCode) {
     Project project =    projectRepository.findByProjectCode(projectCode);
     project.setDeleted(true);
+        project.setProjectCode(project.getProjectCode()+"-"+project.getId());
     projectRepository.save(project);
+
+        taskService.deleteByProject(projectMapper.convertToDto(project));
     }
 
     @Override
@@ -69,6 +72,8 @@ public class ProjectServiceImpl implements ProjectService {
         Project project1 = projectRepository.findByProjectCode(projectCode);
         project1.setProjectStatus(Status.COMPLETE);
         projectRepository.save(project1);
+
+        taskService.completeByProject(projectMapper.convertToDto(project1));
     }
 
     @Override
@@ -98,5 +103,12 @@ public class ProjectServiceImpl implements ProjectService {
             return projectDTO;
 
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProjectDTO> listAllNonCompletedByAssignedManager(UserDTO assignedManager) {
+        List<Project> projects = projectRepository
+                .findAllByProjectStatusIsNotAndAssignedManager(Status.COMPLETE, userMapper.convertToEntity(assignedManager));
+        return projects.stream().map(projectMapper::convertToDto).collect(Collectors.toList());
     }
 }

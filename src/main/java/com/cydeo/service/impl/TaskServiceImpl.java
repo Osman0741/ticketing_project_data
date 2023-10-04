@@ -93,6 +93,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public void deleteByProject(ProjectDTO projectDTO) {
+        List<Task> list = taskRepository.findAllByProject(projectMapper.convertToEntity(projectDTO));
+
+        list.forEach(task-> delete(task.getId()));
+    }
+
+    @Override
     public void completeByProject(ProjectDTO projectDTO) {
 
         List<Task> list = taskRepository.findAllByProject(projectMapper.convertToEntity(projectDTO));
@@ -120,6 +127,13 @@ public class TaskServiceImpl implements TaskService {
 
         UserDTO loginUser = userService.findByUserName("john@employee.com");
         return taskRepository.findAllByTaskStatusAndAssignedEmployee(status , userMapper.convertToEntity(loginUser)).stream().map(taskMapper::convertToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskDTO> listAllNonCompletedByAssignedEmployee(UserDTO assignedEmployee) {
+        List<Task> tasks = taskRepository
+                .findAllByTaskStatusIsNotAndAssignedEmployee(Status.COMPLETE, userMapper.convertToEntity(assignedEmployee));
+        return tasks.stream().map(taskMapper::convertToDto).collect(Collectors.toList());
     }
 
 
